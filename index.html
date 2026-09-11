@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d0d0d">
+    <title>@Chat - Message Anyone</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #1a1a2e;
+            --accent: #667eea;
+            --accent-2: #764ba2;
+            --text-primary: #ffffff;
+            --text-secondary: #aaa;
+            --text-muted: #888;
+            --danger: #e94560;
+            --success: #4ade80;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========== SCREENS ========== */
+        .screen {
+            display: none;
+            height: 100vh;
+            height: 100dvh;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .screen.active { display: flex; }
+
+        /* ========== AUTH SCREEN ========== */
+        #authScreen {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-box {
+            background: var(--bg-secondary);
+            padding: 40px 28px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .auth-box .logo {
+            text-align: center;
+            font-size: 3.5em;
+            margin-bottom: 8px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .auth-box h1 {
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.6em;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .auth-box .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 28px;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-primary);
+            border-radius: 14px;
+            padding: 5px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        .input-wrapper { position: relative; }
+
+        .input-prefix {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input.with-prefix { padding-left: 36px; }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        }
+
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.88em;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert.show { display: block; }
+        .alert-error { background: rgba(233,69,96,0.15); color: #ff8899; border: 1px solid rgba(233,69,96,0.3); }
+        .alert-success { background: rgba(74,222,128,0.15); color: #88ff99; border: 1px solid rgba(74,222,128,0.3); }
+
+        .hidden { display: none !important; }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--bg-secondary);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+            padding-top: calc(14px + env(safe-area-inset-top, 0px));
+        }
+
+        .header h1 {
+            font-size: 1.15em;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .header .user-info { display: flex; align-items: center; gap: 10px; }
+
+        .header .username {
+            color: var(--text-secondary);
+            font-size: 0.88em;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: rgba(233,69,96,0.15);
+            color: var(--danger);
+            border: 1px solid rgba(233,69,96,0.3);
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82em;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover { background: rgba(233,69,96,0.25); }
+
+        /* ========== SEARCH ========== */
+        .search-bar {
+            padding: 12px 18px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+
+        .search-wrapper { position: relative; }
+
+        .search-wrapper .prefix {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .search-wrapper input {
+            padding-left: 36px;
+            background: var(--bg-primary);
+            border: 2px solid transparent;
+        }
+
+        .search-wrapper input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-results {
+            padding: 12px 18px;
+            background: var(--bg-tertiary);
+            max-height: 280px;
+            overflow-y: auto;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+
+        .search-results:empty { display: none; }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-item:hover { background: #1e2a4a; transform: translateX(2px); }
+
+        .user-item .info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.15em;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+
+        .user-item .name { font-weight: 600; font-size: 0.95em; }
+        .user-item .handle { color: var(--text-muted); font-size: 0.82em; }
+
+        .user-item .msg-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.82em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ========== CHAT LIST ========== */
+        .chats {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 18px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 80px 20px;
+        }
+
+        .empty-state .icon { font-size: 4em; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h3 { color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
+        .empty-state p { font-size: 0.88em; }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-item:hover { background: #1e2a4a; transform: translateX(2px); }
+
+        .chat-item .info { flex: 1; min-width: 0; }
+        .chat-item .name { font-weight: 600; margin-bottom: 4px; font-size: 0.95em; }
+
+        .chat-item .preview {
+            color: var(--text-muted);
+            font-size: 0.82em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        /* ========== CONVERSATION ========== */
+        .conv-header {
+            background: var(--bg-secondary);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
+        }
+
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 1.6em;
+            cursor: pointer;
+            padding: 0 6px;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        .conv-header .info { flex: 1; min-width: 0; }
+        .conv-header .name { font-weight: 700; font-size: 1em; }
+        .conv-header .handle { color: var(--text-muted); font-size: 0.82em; }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .message {
+            max-width: 78%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.95em;
+            word-wrap: break-word;
+            line-height: 1.4;
+            animation: fadeIn 0.25s ease;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.mine {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.25);
+        }
+
+        .message.theirs {
+            align-self: flex-start;
+            background: var(--bg-secondary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .message .time {
+            display: block;
+            font-size: 0.68em;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* ========== INPUT AREA - FIXED ========== */
+        .input-area {
+            background: var(--bg-tertiary);
+            padding: 12px 15px;
+            padding-bottom: calc(12px + var(--safe-bottom));
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 13px 18px;
+            background: var(--bg-primary);
+            border: 2px solid transparent;
+            border-radius: 24px;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .input-area button {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            border: none;
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.15em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            transition: transform 0.15s, opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+
+        .input-area button:active { transform: scale(0.92); }
+        .input-area button:disabled { opacity: 0.4; box-shadow: none; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- SCREEN 1: AUTH -->
+<div class="screen active" id="authScreen">
+    <div class="auth-box">
+        <div class="logo">💬</div>
+        <h1>@Chat</h1>
+        <p class="subtitle">Connect with anyone, anywhere</p>
+
+        <div class="tabs">
+            <button class="tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
+            <button class="tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <div class="alert" id="authAlert"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Username</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">@</span>
+                    <input type="text" id="loginUsername" class="with-prefix" placeholder="username" required autocomplete="username">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-primary" id="loginBtn">Login</button>
+        </form>
+
+        <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+            <div class="form-group">
+                <label>Username (@username)</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">@</span>
+                    <input type="text" id="signupUsername" class="with-prefix" placeholder="username" required pattern="[a-z0-9_]{3,20}" title="3-20 chars: a-z, 0-9, _">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" id="signupDisplayName" placeholder="Your Name" required maxlength="30">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn-primary" id="signupBtn">Create Account</button>
+        </form>
+    </div>
+</div>
+
+<!-- SCREEN 2: CHAT LIST -->
+<div class="screen" id="listScreen">
+    <div class="header">
+        <h1>💬 @Chat</h1>
+        <div class="user-info">
+            <span class="username" id="myUsername">@...</span>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <div class="search-wrapper">
+            <span class="prefix">@</span>
+            <input type="text" id="searchInput" placeholder="Search user by @username..." autocomplete="off">
+        </div>
+    </div>
+
+    <div class="search-results" id="searchResults"></div>
+
+    <div class="chats" id="chatsList">
+        <div class="loading">Loading chats...</div>
+    </div>
+</div>
+
+<!-- SCREEN 3: CONVERSATION -->
+<div class="screen" id="convScreen">
+    <div class="conv-header">
+        <button class="back-btn" onclick="backToList()">←</button>
+        <div class="avatar" id="convAvatar">?</div>
+        <div class="info">
+            <div class="name" id="convName">Loading...</div>
+            <div class="handle" id="convHandle">@...</div>
+        </div>
+    </div>
+
+    <div class="messages" id="messagesBox"></div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+        <button id="sendBtn" disabled>➤</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, onSnapshot, orderBy, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBJIquWKVAIZphH88FhUfDpwziZKvwOBlo",
+        authDomain: "ranncheats.firebaseapp.com",
+        projectId: "ranncheats",
+        storageBucket: "ranncheats.firebasestorage.app",
+        messagingSenderId: "814435055152",
+        appId: "1:814435055152:web:cf47668c4992929bc3dff5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentUserData = null;
+    let activeChatId = null;
+    let activeOtherUid = null;
+    let messagesUnsubscribe = null;
+    let chatsUnsubscribe = null;
+    let searchTimeout = null;
+
+    window.showScreen = function(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    };
+
+    window.switchTab = function(tab) {
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabSignup = document.getElementById('tabSignup');
+        if (tab === 'login') {
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            tabLogin.classList.add('active');
+            tabSignup.classList.remove('active');
+        } else {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            tabLogin.classList.remove('active');
+            tabSignup.classList.add('active');
+        }
+    };
+
+    function showAuthAlert(msg, type = 'error') {
+        const box = document.getElementById('authAlert');
+        box.textContent = msg;
+        box.className = 'alert alert-' + type + ' show';
+        setTimeout(() => box.classList.remove('show'), 4000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function initialOf(name) {
+        return (name || '?').charAt(0).toUpperCase();
+    }
+
+    window.handleSignup = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('signupBtn');
+        const username = document.getElementById('signupUsername').value.trim().toLowerCase();
+        const displayName = document.getElementById('signupDisplayName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+
+        if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+            showAuthAlert('Username: 3-20 chars, only a-z, 0-9, _');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Creating...';
+
+        try {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', username));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) throw new Error('Username already taken!');
+
+            const cred = await createUserWithEmailAndPassword(auth, email, password);
+            const uid = cred.user.uid;
+
+            await setDoc(doc(db, 'users', uid), {
+                uid: uid,
+                username: username,
+                displayName: displayName,
+                email: email,
+                createdAt: serverTimestamp()
+            });
+        } catch (err) {
+            let msg = err.message;
+            if (msg.includes('email-already-in-use')) msg = 'Email already registered!';
+            if (msg.includes('invalid-email')) msg = 'Invalid email address!';
+            if (msg.includes('weak-password')) msg = 'Password too weak!';
+            showAuthAlert(msg);
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
+        }
+    };
+
+    window.handleLogin = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('loginBtn');
+        const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+        const password = document.getElementById('loginPassword').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Logging in...';
+
+        try {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', username), limit(1));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) throw new Error('Username not found!');
+
+            const email = snapshot.docs[0].data().email;
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            let msg = err.message;
+            if (msg.includes('invalid-credential') || msg.includes('wrong-password')) msg = 'Wrong password!';
+            showAuthAlert(msg);
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        }
+    };
+
+    window.handleLogout = async function() {
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        if (chatsUnsubscribe) chatsUnsubscribe();
+        await signOut(auth);
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            currentUser = null;
+            currentUserData = null;
+            showScreen('authScreen');
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginBtn').textContent = 'Login';
+            document.getElementById('signupBtn').disabled = false;
+            document.getElementById('signupBtn').textContent = 'Create Account';
+            return;
+        }
+        currentUser = user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+            currentUserData = userDoc.data();
+            document.getElementById('myUsername').textContent = '@' + currentUserData.username;
+        }
+        showScreen('listScreen');
+        loadChats();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        const term = e.target.value.trim().toLowerCase();
+        const resultsBox = document.getElementById('searchResults');
+        if (term.length < 2) { resultsBox.innerHTML = ''; return; }
+        searchTimeout = setTimeout(() => searchUsers(term), 400);
+    });
+
+    async function searchUsers(term) {
+        const resultsBox = document.getElementById('searchResults');
+        resultsBox.innerHTML = '<div class="loading">Searching...</div>';
+        try {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '>=', term), where('username', '<=', term + '\uf8ff'), limit(20));
+            const snapshot = await getDocs(q);
+            const results = [];
+            snapshot.forEach((d) => {
+                const data = d.data();
+                if (data.uid !== currentUser.uid) results.push(data);
+            });
+            if (results.length === 0) { resultsBox.innerHTML = '<div class="loading">No users found</div>'; return; }
+            resultsBox.innerHTML = results.map(u => `
+                <div class="user-item" onclick="startChat('${u.uid}', '${escapeHtml(u.username)}', '${escapeHtml(u.displayName)}')">
+                    <div class="info">
+                        <div class="avatar">${initialOf(u.displayName)}</div>
+                        <div>
+                            <div class="name">${escapeHtml(u.displayName)}</div>
+                            <div class="handle">@${escapeHtml(u.username)}</div>
+                        </div>
+                    </div>
+                    <button class="msg-btn">Message</button>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error(err);
+            resultsBox.innerHTML = '<div class="loading">Error searching</div>';
+        }
+    }
+
+    window.startChat = async function(otherUid, otherUsername, otherDisplayName) {
+        const chatId = [currentUser.uid, otherUid].sort().join('_');
+        const chatDoc = await getDoc(doc(db, 'chats', chatId));
+        if (!chatDoc.exists()) {
+            await setDoc(doc(db, 'chats', chatId), {
+                participants: [currentUser.uid, otherUid],
+                participantInfo: {
+                    [currentUser.uid]: { username: currentUserData.username, displayName: currentUserData.displayName },
+                    [otherUid]: { username: otherUsername, displayName: otherDisplayName }
+                },
+                lastMessage: '',
+                lastMessageAt: serverTimestamp()
+            });
+        }
+        openConversation(chatId, otherUid);
+    };
+
+    function loadChats() {
+        if (chatsUnsubscribe) chatsUnsubscribe();
+        const chatsList = document.getElementById('chatsList');
+        const chatsRef = collection(db, 'chats');
+        const q = query(chatsRef, where('participants', 'array-contains', currentUser.uid));
+        chatsUnsubscribe = onSnapshot(q, (snapshot) => {
+            if (snapshot.empty) {
+                chatsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">💬</div>
+                        <h3>No chats yet</h3>
+                        <p>Search a @username above to start chatting</p>
+                    </div>
+                `;
+                return;
+            }
+            const chats = [];
+            snapshot.forEach((d) => chats.push({ id: d.id, ...d.data() }));
+            chats.sort((a, b) => {
+                const aT = a.lastMessageAt?.toMillis?.() || 0;
+                const bT = b.lastMessageAt?.toMillis?.() || 0;
+                return bT - aT;
+            });
+            chatsList.innerHTML = chats.map(chat => {
+                const otherUid = chat.participants.find(uid => uid !== currentUser.uid);
+                const info = chat.participantInfo?.[otherUid] || { username: 'unknown', displayName: 'Unknown' };
+                const preview = chat.lastMessage ? escapeHtml(chat.lastMessage) : 'No messages yet';
+                return `
+                    <div class="chat-item" onclick="openConversation('${chat.id}', '${otherUid}')">
+                        <div class="avatar">${initialOf(info.displayName)}</div>
+                        <div class="info">
+                            <div class="name">${escapeHtml(info.displayName)}</div>
+                            <div class="preview">@${escapeHtml(info.username)} · ${preview}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        });
+    }
+
+    window.openConversation = async function(chatId, otherUid) {
+        activeChatId = chatId;
+        activeOtherUid = otherUid;
+        showScreen('convScreen');
+        document.getElementById('messagesBox').innerHTML = '';
+
+        const otherDoc = await getDoc(doc(db, 'users', otherUid));
+        if (otherDoc.exists()) {
+            const data = otherDoc.data();
+            document.getElementById('convName').textContent = data.displayName;
+            document.getElementById('convHandle').textContent = '@' + data.username;
+            document.getElementById('convAvatar').textContent = initialOf(data.displayName);
+        }
+
+        if (messagesUnsubscribe) messagesUnsubscribe();
+        const messagesRef = collection(db, 'chats', chatId, 'messages');
+        const q = query(messagesRef, orderBy('createdAt', 'asc'));
+        messagesUnsubscribe = onSnapshot(q, (snapshot) => {
+            const box = document.getElementById('messagesBox');
+            box.innerHTML = '';
+            snapshot.forEach((d) => {
+                const msg = d.data();
+                const isMine = msg.senderId === currentUser.uid;
+                const div = document.createElement('div');
+                div.className = 'message ' + (isMine ? 'mine' : 'theirs');
+                const time = msg.createdAt?.toDate?.() || new Date();
+                const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                div.innerHTML = `${escapeHtml(msg.text)}<span class="time">${timeStr}</span>`;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    };
+
+    window.backToList = function() {
+        if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+        activeChatId = null;
+        activeOtherUid = null;
+        document.getElementById('messagesBox').innerHTML = '';
+        showScreen('listScreen');
+    };
+
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    messageInput.addEventListener('input', () => { sendBtn.disabled = !messageInput.value.trim(); });
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && messageInput.value.trim()) sendMessage(); });
+    sendBtn.addEventListener('click', sendMessage);
+
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !activeChatId) return;
+        messageInput.value = '';
+        sendBtn.disabled = true;
+        try {
+            await addDoc(collection(db, 'chats', activeChatId, 'messages'), {
+                senderId: currentUser.uid,
+                text: text,
+                createdAt: serverTimestamp()
+            });
+            await updateDoc(doc(db, 'chats', activeChatId), {
+                lastMessage: text,
+                lastMessageAt: serverTimestamp()
+            });
+        } catch (err) {
+            console.error(err);
+            alert('Failed to send: ' + err.message);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') e.preventDefault();
+    });
+</script>
+
+</body>
+</html>
