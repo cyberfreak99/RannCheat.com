@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0d0d0d">
     <title>@Chat - Message Anyone</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <link rel="icon" href="https://cyberfreak99.github.io/RannCheat.com/deepseek_20260912_6a4fae.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -35,7 +35,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ========== SCREENS ========== */
         .screen {
             display: none;
             height: 100vh;
@@ -49,7 +48,6 @@
         }
         .screen.active { display: flex; }
 
-        /* ========== AUTH SCREEN ========== */
         #authScreen {
             justify-content: center;
             align-items: center;
@@ -70,9 +68,19 @@
 
         .auth-box .logo {
             text-align: center;
-            font-size: 3.5em;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             animation: float 3s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
+        }
+
+        .auth-box .logo img {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 8px 30px rgba(233, 69, 96, 0.5);
+            border: 2px solid rgba(233, 69, 96, 0.3);
         }
 
         @keyframes float {
@@ -203,7 +211,6 @@
 
         .hidden { display: none !important; }
 
-        /* ========== HEADER ========== */
         .header {
             background: var(--bg-secondary);
             padding: 14px 18px;
@@ -243,7 +250,6 @@
 
         .logout-btn:hover { background: rgba(233,69,96,0.25); }
 
-        /* ========== SEARCH ========== */
         .search-bar {
             padding: 12px 18px;
             background: var(--bg-tertiary);
@@ -268,9 +274,7 @@
             border: 2px solid transparent;
         }
 
-        .search-wrapper input:focus {
-            border-color: var(--accent);
-        }
+        .search-wrapper input:focus { border-color: var(--accent); }
 
         .search-results {
             padding: 12px 18px;
@@ -330,7 +334,6 @@
             flex-shrink: 0;
         }
 
-        /* ========== CHAT LIST ========== */
         .chats {
             flex: 1;
             overflow-y: auto;
@@ -381,7 +384,6 @@
             font-size: 0.9em;
         }
 
-        /* ========== CONVERSATION ========== */
         .conv-header {
             background: var(--bg-secondary);
             padding: 12px 15px;
@@ -456,7 +458,6 @@
             text-align: right;
         }
 
-        /* ========== INPUT AREA - FIXED ========== */
         .input-area {
             background: var(--bg-tertiary);
             padding: 12px 15px;
@@ -504,12 +505,10 @@
         .input-area button:active { transform: scale(0.92); }
         .input-area button:disabled { opacity: 0.4; box-shadow: none; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
-        /* Loading spinner */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -527,10 +526,11 @@
 </head>
 <body>
 
-<!-- SCREEN 1: AUTH -->
 <div class="screen active" id="authScreen">
     <div class="auth-box">
-        <div class="logo">💬</div>
+        <div class="logo">
+            <img src="https://cyberfreak99.github.io/RannCheat.com/deepseek_20260912_6a4fae.png" alt="Logo">
+        </div>
         <h1>@Chat</h1>
         <p class="subtitle">Connect with anyone, anywhere</p>
 
@@ -581,7 +581,6 @@
     </div>
 </div>
 
-<!-- SCREEN 2: CHAT LIST -->
 <div class="screen" id="listScreen">
     <div class="header">
         <h1>💬 @Chat</h1>
@@ -605,7 +604,6 @@
     </div>
 </div>
 
-<!-- SCREEN 3: CONVERSATION -->
 <div class="screen" id="convScreen">
     <div class="conv-header">
         <button class="back-btn" onclick="backToList()">←</button>
