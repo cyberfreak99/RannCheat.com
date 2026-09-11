@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0d0d0d">
+    <meta name="theme-color" content="#ffffff">
     <title>@Chat - Message Anyone</title>
     <link rel="icon" href="https://cyberfreak99.github.io/RannCheat.com/deepseek_20260912_6a4fae.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         :root {
-            --bg-primary: #0d0d0d;
-            --bg-secondary: #16213e;
-            --bg-tertiary: #1a1a2e;
-            --accent: #667eea;
-            --accent-2: #764ba2;
-            --text-primary: #ffffff;
-            --text-secondary: #aaa;
-            --text-muted: #888;
-            --danger: #e94560;
-            --success: #4ade80;
+            --bg-page: #f0f0f3;
+            --bg-card: #ffffff;
+            --bg-black: #1a1a1a;
+            --text-primary: #1a1a1a;
+            --text-secondary: #888;
+            --text-muted: #bbb;
+            --border: #e5e5e5;
+            --accent: #1a1a1a;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         
         html, body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
-            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', 'Inter', Arial, sans-serif;
+            background: var(--bg-page);
             color: var(--text-primary);
             height: 100vh;
             height: 100dvh;
@@ -41,161 +39,193 @@
             height: 100dvh;
             flex-direction: column;
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
         }
         .screen.active { display: flex; }
 
+        /* ========== AUTH SCREEN ========== */
         #authScreen {
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            overflow-y: auto;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            overflow: hidden;
+            background: var(--bg-page);
         }
 
-        .auth-box {
-            background: var(--bg-secondary);
-            padding: 40px 28px;
-            border-radius: 24px;
+        .auth-card {
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.08);
+            height: 100%;
+            max-width: 100%;
+            background: var(--bg-card);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .auth-box .logo {
-            text-align: center;
-            margin-bottom: 15px;
-            animation: float 3s ease-in-out infinite;
+        /* Black curved header */
+        .auth-header {
+            background: var(--bg-black);
+            position: relative;
+            height: 220px;
+            width: 100%;
+            border-bottom-left-radius: 50% 50px;
+            border-bottom-right-radius: 50% 50px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
-        .auth-box .logo img {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
+        /* Decorative triangles */
+        .auth-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(255,255,255,0.06) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.06) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.06) 75%);
+            background-size: 40px 40px;
+            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+            opacity: 0.5;
+        }
+
+        .logo-box {
+            width: 75px;
+            height: 75px;
+            background: white;
+            border-radius: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 18px;
             object-fit: cover;
-            box-shadow: 0 8px 30px rgba(233, 69, 96, 0.5);
-            border: 2px solid rgba(233, 69, 96, 0.3);
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-6px); }
         }
 
-        .auth-box h1 {
-            text-align: center;
-            color: var(--accent);
-            font-size: 1.6em;
-            margin-bottom: 6px;
+        /* Form container */
+        .auth-body {
+            flex: 1;
+            padding: 30px 28px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-title {
+            font-size: 1.9em;
             font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
         }
 
-        .auth-box .subtitle {
-            text-align: center;
+        .auth-subtitle {
             color: var(--text-muted);
             font-size: 0.85em;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
         }
 
-        .tabs {
-            display: flex;
-            background: var(--bg-primary);
-            border-radius: 14px;
-            padding: 5px;
-            margin-bottom: 24px;
+        /* Form groups */
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
         }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-muted);
-            border: none;
-            background: transparent;
-            font-size: 0.95em;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: white;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-        }
-
-        .form-group { margin-bottom: 16px; }
 
         .form-group label {
             display: block;
             color: var(--text-secondary);
-            margin-bottom: 6px;
-            font-size: 0.82em;
-            font-weight: 600;
+            font-size: 0.78em;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
         }
 
-        .input-wrapper { position: relative; }
-
-        .input-prefix {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--accent);
-            font-weight: bold;
-            pointer-events: none;
-        }
-
-        input {
+        .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            background: var(--bg-primary);
-            color: white;
-            font-size: 16px;
+            padding: 12px 0;
+            border: none;
+            border-bottom: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.95em;
             font-family: inherit;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.3s;
         }
 
-        input.with-prefix { padding-left: 36px; }
-
-        input:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+            border-bottom-color: var(--accent);
         }
 
+        .form-group input::placeholder {
+            color: var(--text-muted);
+            font-size: 0.95em;
+        }
+
+        /* Button */
         .btn-primary {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            padding: 16px;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1em;
-            font-weight: 700;
+            font-size: 0.95em;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
-            transition: transform 0.15s, box-shadow 0.15s;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            margin-top: 15px;
+            letter-spacing: 0.3px;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
         .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* Switch link */
+        .switch-link {
+            text-align: center;
+            margin-top: auto;
+            padding-top: 25px;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .switch-link a {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+
+        .switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alert */
         .alert {
             padding: 12px 16px;
             border-radius: 10px;
-            margin-bottom: 16px;
-            font-size: 0.88em;
+            margin-bottom: 20px;
+            font-size: 0.82em;
             display: none;
             animation: slideDown 0.3s ease;
         }
@@ -206,54 +236,74 @@
         }
 
         .alert.show { display: block; }
-        .alert-error { background: rgba(233,69,96,0.15); color: #ff8899; border: 1px solid rgba(233,69,96,0.3); }
-        .alert-success { background: rgba(74,222,128,0.15); color: #88ff99; border: 1px solid rgba(74,222,128,0.3); }
+        .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 
         .hidden { display: none !important; }
 
+        /* Back button (signup) */
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.4em;
+            cursor: pointer;
+            z-index: 3;
+            background: transparent;
+            border: none;
+            padding: 5px 10px;
+            font-weight: bold;
+        }
+
+        /* ========== CHAT LIST SCREEN ========== */
+        #listScreen {
+            background: var(--bg-card);
+        }
+
         .header {
-            background: var(--bg-secondary);
+            background: var(--bg-black);
             padding: 14px 18px;
+            padding-top: calc(14px + env(safe-area-inset-top, 0px));
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
             flex-shrink: 0;
-            padding-top: calc(14px + env(safe-area-inset-top, 0px));
+            color: white;
         }
 
         .header h1 {
-            font-size: 1.15em;
-            color: var(--accent);
+            font-size: 1.1em;
             font-weight: 700;
+            color: white;
         }
 
         .header .user-info { display: flex; align-items: center; gap: 10px; }
 
         .header .username {
-            color: var(--text-secondary);
-            font-size: 0.88em;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.82em;
             font-weight: 500;
         }
 
         .logout-btn {
-            background: rgba(233,69,96,0.15);
-            color: var(--danger);
-            border: 1px solid rgba(233,69,96,0.3);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
             padding: 7px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.82em;
+            font-size: 0.78em;
             transition: background 0.2s;
         }
 
-        .logout-btn:hover { background: rgba(233,69,96,0.25); }
+        .logout-btn:hover { background: rgba(255,255,255,0.25); }
 
         .search-bar {
-            padding: 12px 18px;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
 
@@ -261,27 +311,37 @@
 
         .search-wrapper .prefix {
             position: absolute;
-            left: 16px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--accent);
+            color: var(--text-muted);
             font-weight: bold;
+            font-size: 0.95em;
         }
 
         .search-wrapper input {
-            padding-left: 36px;
-            background: var(--bg-primary);
-            border: 2px solid transparent;
+            width: 100%;
+            padding: 12px 14px 12px 32px;
+            background: var(--bg-page);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: background 0.2s;
         }
 
-        .search-wrapper input:focus { border-color: var(--accent); }
+        .search-wrapper input:focus {
+            outline: none;
+            background: #e8e8ec;
+        }
 
         .search-results {
-            padding: 12px 18px;
-            background: var(--bg-tertiary);
+            padding: 10px 18px;
+            background: var(--bg-card);
             max-height: 280px;
             overflow-y: auto;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
 
@@ -292,45 +352,52 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 14px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
+            background: var(--bg-page);
+            border-radius: 14px;
             margin-bottom: 8px;
             cursor: pointer;
             transition: background 0.2s, transform 0.15s;
-            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .user-item:hover { background: #1e2a4a; transform: translateX(2px); }
+        .user-item:hover { background: #e4e4e8; transform: translateX(2px); }
 
         .user-item .info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
         .avatar {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background: var(--bg-black);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             color: white;
-            font-size: 1.15em;
+            font-size: 1.05em;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
 
-        .user-item .name { font-weight: 600; font-size: 0.95em; }
-        .user-item .handle { color: var(--text-muted); font-size: 0.82em; }
+        .avatar-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+        }
+
+        .user-item .name { font-weight: 600; font-size: 0.9em; color: var(--text-primary); }
+        .user-item .handle { color: var(--text-muted); font-size: 0.78em; }
 
         .user-item .msg-btn {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background: var(--bg-black);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 0.82em;
-            font-weight: 700;
+            font-size: 0.78em;
+            font-weight: 600;
             flex-shrink: 0;
         }
 
@@ -347,31 +414,31 @@
             padding: 80px 20px;
         }
 
-        .empty-state .icon { font-size: 4em; margin-bottom: 16px; opacity: 0.5; }
-        .empty-state h3 { color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
-        .empty-state p { font-size: 0.88em; }
+        .empty-state .icon { font-size: 3.5em; margin-bottom: 16px; opacity: 0.4; }
+        .empty-state h3 { color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; font-size: 1em; }
+        .empty-state p { font-size: 0.82em; }
 
         .chat-item {
             display: flex;
             align-items: center;
             gap: 14px;
             padding: 14px;
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             border-radius: 14px;
             margin-bottom: 10px;
             cursor: pointer;
             transition: background 0.2s, transform 0.15s;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
         }
 
-        .chat-item:hover { background: #1e2a4a; transform: translateX(2px); }
+        .chat-item:hover { background: var(--bg-page); transform: translateX(2px); }
 
         .chat-item .info { flex: 1; min-width: 0; }
-        .chat-item .name { font-weight: 600; margin-bottom: 4px; font-size: 0.95em; }
+        .chat-item .name { font-weight: 600; margin-bottom: 4px; font-size: 0.9em; }
 
         .chat-item .preview {
             color: var(--text-muted);
-            font-size: 0.82em;
+            font-size: 0.78em;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -381,34 +448,42 @@
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
+        /* ========== CONVERSATION ========== */
+        #convScreen { background: var(--bg-page); }
+
         .conv-header {
-            background: var(--bg-secondary);
+            background: var(--bg-black);
+            color: white;
             padding: 12px 15px;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
             flex-shrink: 0;
-            padding-top: calc(12px + env(safe-area-inset-top, 0px));
         }
 
         .back-btn {
             background: transparent;
             border: none;
-            color: var(--accent);
-            font-size: 1.6em;
+            color: white;
+            font-size: 1.5em;
             cursor: pointer;
             padding: 0 6px;
             line-height: 1;
             font-weight: bold;
         }
 
+        .conv-header .avatar {
+            background: white;
+            color: var(--bg-black);
+        }
+
         .conv-header .info { flex: 1; min-width: 0; }
-        .conv-header .name { font-weight: 700; font-size: 1em; }
-        .conv-header .handle { color: var(--text-muted); font-size: 0.82em; }
+        .conv-header .name { font-weight: 700; font-size: 0.95em; color: white; }
+        .conv-header .handle { color: rgba(255,255,255,0.6); font-size: 0.78em; }
 
         .messages {
             flex: 1;
@@ -424,11 +499,10 @@
             max-width: 78%;
             padding: 10px 14px;
             border-radius: 18px;
-            font-size: 0.95em;
+            font-size: 0.92em;
             word-wrap: break-word;
             line-height: 1.4;
             animation: fadeIn 0.25s ease;
-            position: relative;
         }
 
         @keyframes fadeIn {
@@ -438,81 +512,82 @@
 
         .message.mine {
             align-self: flex-end;
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background: var(--bg-black);
+            color: white;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.25);
         }
 
         .message.theirs {
             align-self: flex-start;
-            background: var(--bg-secondary);
+            background: white;
+            color: var(--text-primary);
             border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
         }
 
         .message .time {
             display: block;
-            font-size: 0.68em;
-            opacity: 0.7;
+            font-size: 0.65em;
+            opacity: 0.6;
             margin-top: 4px;
             text-align: right;
         }
 
         .input-area {
-            background: var(--bg-tertiary);
+            background: white;
             padding: 12px 15px;
             padding-bottom: calc(12px + var(--safe-bottom));
             display: flex;
             gap: 10px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--border);
             flex-shrink: 0;
             align-items: center;
         }
 
         .input-area input {
             flex: 1;
-            padding: 13px 18px;
-            background: var(--bg-primary);
-            border: 2px solid transparent;
+            padding: 12px 18px;
+            background: var(--bg-page);
+            border: none;
             border-radius: 24px;
-            color: white;
+            color: var(--text-primary);
             font-size: 16px;
-            transition: border-color 0.3s;
+            font-family: inherit;
+            transition: background 0.2s;
         }
 
         .input-area input:focus {
             outline: none;
-            border-color: var(--accent);
+            background: #e8e8ec;
         }
 
         .input-area button {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            background: var(--bg-black);
             border: none;
             color: white;
             width: 46px;
             height: 46px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.15em;
+            font-size: 1.1em;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-shrink: 0;
             transition: transform 0.15s, opacity 0.2s;
-            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
 
         .input-area button:active { transform: scale(0.92); }
-        .input-area button:disabled { opacity: 0.4; box-shadow: none; }
+        .input-area button:disabled { opacity: 0.4; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
             border-top-color: white;
             border-radius: 50%;
@@ -522,65 +597,93 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== DESKTOP ========== */
+        @media (min-width: 600px) {
+            #authScreen {
+                padding: 20px;
+            }
+            .auth-card {
+                max-width: 420px;
+                height: auto;
+                min-height: 600px;
+                max-height: 90vh;
+                border-radius: 28px;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+            }
+            .auth-header { height: 200px; }
+        }
     </style>
 </head>
 <body>
 
+<!-- ========== AUTH SCREEN ========== -->
 <div class="screen active" id="authScreen">
-    <div class="auth-box">
-        <div class="logo">
-            <img src="https://cyberfreak99.github.io/RannCheat.com/deepseek_20260912_6a4fae.png" alt="Logo">
-        </div>
-        <h1>@Chat</h1>
-        <p class="subtitle">Connect with anyone, anywhere</p>
-
-        <div class="tabs">
-            <button class="tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
-            <button class="tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    <div class="auth-card">
+        <div class="auth-header">
+            <button class="back-arrow hidden" id="backArrow" onclick="switchTab('login')">←</button>
+            <div class="logo-box">
+                <img src="https://cyberfreak99.github.io/RannCheat.com/deepseek_20260912_6a4fae.png" alt="Logo">
+            </div>
         </div>
 
-        <div class="alert" id="authAlert"></div>
+        <div class="auth-body">
+            <div class="alert" id="authAlert"></div>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label>Username</label>
-                <div class="input-wrapper">
-                    <span class="input-prefix">@</span>
-                    <input type="text" id="loginUsername" class="with-prefix" placeholder="username" required autocomplete="username">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
-            </div>
-            <button type="submit" class="btn-primary" id="loginBtn">Login</button>
-        </form>
+            <!-- LOGIN FORM -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <h1 class="auth-title">Login</h1>
+                <p class="auth-subtitle">Welcome back! Please login to continue</p>
 
-        <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
-            <div class="form-group">
-                <label>Username (@username)</label>
-                <div class="input-wrapper">
-                    <span class="input-prefix">@</span>
-                    <input type="text" id="signupUsername" class="with-prefix" placeholder="username" required pattern="[a-z0-9_]{3,20}" title="3-20 chars: a-z, 0-9, _">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="your@username" required autocomplete="username">
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Display Name</label>
-                <input type="text" id="signupDisplayName" placeholder="Your Name" required maxlength="30">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="signupEmail" placeholder="you@example.com" required autocomplete="email">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password">
-            </div>
-            <button type="submit" class="btn-primary" id="signupBtn">Create Account</button>
-        </form>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-primary" id="loginBtn">Login</button>
+
+                <div class="switch-link">
+                    Don't have an account? <a onclick="switchTab('signup')">Sign Up</a>
+                </div>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+                <h1 class="auth-title">Sign Up</h1>
+                <p class="auth-subtitle">Create your account to get started</p>
+
+                <div class="form-group">
+                    <label>Username (@username)</label>
+                    <input type="text" id="signupUsername" placeholder="username" required pattern="[a-z0-9_]{3,20}" title="3-20 chars: a-z, 0-9, _">
+                </div>
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" id="signupDisplayName" placeholder="Your Name" required maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-primary" id="signupBtn">Sign Up</button>
+
+                <div class="switch-link">
+                    Already have an account? <a onclick="switchTab('login')">Login</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<!-- ========== CHAT LIST ========== -->
 <div class="screen" id="listScreen">
     <div class="header">
         <h1>💬 @Chat</h1>
@@ -604,6 +707,7 @@
     </div>
 </div>
 
+<!-- ========== CONVERSATION ========== -->
 <div class="screen" id="convScreen">
     <div class="conv-header">
         <button class="back-btn" onclick="backToList()">←</button>
@@ -656,19 +760,18 @@
     window.switchTab = function(tab) {
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
-        const tabLogin = document.getElementById('tabLogin');
-        const tabSignup = document.getElementById('tabSignup');
+        const backArrow = document.getElementById('backArrow');
+
         if (tab === 'login') {
             loginForm.classList.remove('hidden');
             signupForm.classList.add('hidden');
-            tabLogin.classList.add('active');
-            tabSignup.classList.remove('active');
+            backArrow.classList.add('hidden');
         } else {
             loginForm.classList.add('hidden');
             signupForm.classList.remove('hidden');
-            tabLogin.classList.remove('active');
-            tabSignup.classList.add('active');
+            backArrow.classList.remove('hidden');
         }
+        document.getElementById('authAlert').classList.remove('show');
     };
 
     function showAuthAlert(msg, type = 'error') {
@@ -727,7 +830,7 @@
             if (msg.includes('weak-password')) msg = 'Password too weak!';
             showAuthAlert(msg);
             btn.disabled = false;
-            btn.textContent = 'Create Account';
+            btn.textContent = 'Sign Up';
         }
     };
 
@@ -771,7 +874,8 @@
             document.getElementById('loginBtn').disabled = false;
             document.getElementById('loginBtn').textContent = 'Login';
             document.getElementById('signupBtn').disabled = false;
-            document.getElementById('signupBtn').textContent = 'Create Account';
+            document.getElementById('signupBtn').textContent = 'Sign Up';
+            switchTab('login');
             return;
         }
         currentUser = user;
